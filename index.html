@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <h3>Board Game Role Distributer</h3>
+  </head>
+  <form name="adminForm" action="./create_game.php" method="POST">
+    Number of players: <input name="player_num" type="text" /></br>
+    <p>The roles involved. eg: Werewolf</br>
+    Priest<br>
+    Villagers.</br> 
+    The different roles are seperated with a new line and without any spaces. Multiple roles can be assigend by the multiplication sign, eg: werewolf*4.</p> 
+    Roles:<textarea name="role_list" rows="10" cols"30"></textarea></br>
+    <input type="submit" value="Create game!" />
+  </form>
+</html>
