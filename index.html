@@ -2,8 +2,15 @@
   <head>
     <h3>Board Game Role Distributer</h3>
   </head>
-  <form name="adminForm" action="./create_game.php" method="POST">
-    Number of players: <input name="player_num" type="text" /></br>
+  <form name="guest_form" action="./join_game.php" method="GET">
+    <h2>Join a game:</h2>
+    <p>Your game id: 
+    <input type="text" name="game_id" />
+    <input type="submit" value="Join the game!"/>
+  </form>
+
+  <form name="admin_form" action="./create_game.php" method="POST">
+    <h2>Or host a new game: </h2>
     <p>The roles involved. eg: Werewolf</br>
     Priest<br>
     Villagers.</br> 

@@ -36,9 +36,8 @@ while(true){
   $game_id=rand(100000, 999999);
   $query="SELECT * FROM werewolf_gameid WHERE game_id=" . $game_id;
 }
-echo "game id: " . $game_id;
 if($mysqli->query("INSERT INTO werewolf_gameid (game_id, player_num_limit)".                "VALUES ('" . $game_id . "', '" . $player_num ."')") == true){
-  echo "</br>Create game succeed. Your game id is " . $game_id ."</br>";
+  echo "</br>Create game succeed. Your game id is " . $game_id .". Your friend can use this number to join in the game.</br>";
 }
 else{
   echo "</br>Create game failed. Please try again later.</br>";
@@ -46,10 +45,12 @@ else{
 
 $query="INSERT INTO werewolf_detail (game_id, all_roles) VALUES ('" . $game_id . "', '" . $raw_role_string . "')";
 if($mysqli->query($query)){
-  echo "Detail writing success. </br>";
+  echo "Redirecting to game console in 3 seconds. Do not refresh the page. </br>";
+  echo "<script>window.setInterval(function(){document.location='./control_game.php?game_id=". $game_id . "'}, 3000)</script>"; 
 }else{
   echo "Detail writing failed. </br>";
 }
+
 /*$link=mysql_connect('mydb.ics.purdue.edu:3306/gao118',
                     'gao118', 'polaris')
                   or die("Can not connect to db. " . mysql_error());
