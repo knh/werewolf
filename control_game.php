@@ -22,6 +22,7 @@ $counter=0;
 $player_num=0;
 $all_role_table=array();
 foreach($role_array as &$role){
+  //echo "</br>DEBUG: role: $role</br>";
   $sub_role = explode("*", $role);
   if(isset($sub_role[1])){
     $role=$sub_role[0];
@@ -29,6 +30,7 @@ foreach($role_array as &$role){
     $role_num_array[$counter] = (int)$sub_role[1];
   }
   else{
+    $all_role_table[$role]=(int) 1;
     $role_num_array[$counter] = 1;
   }
   $player_num += $role_num_array[$counter];
@@ -41,7 +43,8 @@ foreach($all_role_table as $key => $val){
   $curr_role_table[$key] = 0;
 }
 $raw_curr_role_string=$temp_row['current_roles'];
-$role_array=preg_split("/(\r\n|\n|\r)/", $raw_curr_role_string);
+//echo "</br>DEBUG: $raw_curr_role_string </br>";
+$role_array=explode(",", $raw_curr_role_string);
 foreach($role_array as $role){
   $sub_role=explode("*", $role);
   if(isset($sub_role[1])){

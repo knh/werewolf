@@ -24,7 +24,7 @@ else{
         "<input type='hidden' name='last_update' value='" . $_POST['last_update'] ."'/>".
         "<input type='submit' value='Get new role'/>".
         "</form>";
-        return;
+      return;
     }
   }
   $raw_role_string=$temp_row['all_roles'];
@@ -44,17 +44,22 @@ else{
   }
   $curr_player=0;
   $raw_role_string=$temp_row['current_roles'];
-  $role_array=preg_split("/(\r\n|\n|\r)/", $raw_role_string);
+  echo "DEBUG: raw_role_string: $raw_role_string</br>";
+  //echo "DEGUG: is empty: ". ($raw_role_string == '') . "</br>";
+  $role_array=explode(",", $raw_role_string);
   $curr_role_array=array();
-  foreach($role_array as $role){
-    $sub_role=explode("*", $role);
-    if(isset($sub_role[1])){
-      $curr_role_array[$sub_role[0]]=(int) $sub_role[1];
-      $curr_player+=$sub_role[1];
-    }
-    else{
-      $curr_role_array[$sub_role[0]]=(int) 1;
-      $curr_player+=1;
+  if($role_array[0] != ''){
+    foreach($role_array as $role){
+      $sub_role=explode("*", $role);
+      echo "Debug: curr_role: " . $sub_role[0] . "</br>";
+      if(isset($sub_role[1])){
+        $curr_role_array[$sub_role[0]]=(int) $sub_role[1];
+        $curr_player+=$sub_role[1];
+      }
+      else{
+        $curr_role_array[$sub_role[0]]=(int) 1;
+        $curr_player+=1;
+      }
     }
   }
   if($curr_player >= $total_player){
@@ -69,34 +74,17 @@ else{
       $remaining_role_array[$key] = $val;
     }
   }
-  /*echo "<table>\n";
-    echo "\t<tr>\n";
-    echo "\n\n<td>Roles</td>\n";
-    echo "\n\n<td>Max Number</td>\n\n\n<td>Remaining Number</td>\n";
-    echo "\t<tr>\n";
-    foreach($total_role_array as $key => $val){
-    echo "\t<tr>\n";
-    echo "\n\n<td>$key</td>\n";
-    echo "\n\n<td>$val</td>\n";
-    echo "\n\n<td>" . $remaining_role_array[$key] . "</td>\n";
-    echo "\t</tr>\n";
-    }
-    echo "</table>\n";
-    echo "<form name='reset_form' action='./reset_game.php' method='POST'>".
-    "<input type='hidden' name='game_id' value='$game_id'/>".
-    "<input type='submit' value='Reset game'/>".
-    "</form>";
-   */
+
 
   $random_num=rand(0, $total_player-$curr_player);
   //echo "ran: $random_num, total: $total_player, curr: $curr_player </br>";
   $user_role;
   foreach($remaining_role_array as $key =>$val){
-    //echo "foreach: $key => $val </br>";
+    echo "foreach: $key => $val </br>";
     while($random_num != 0 && $val != 0){
-      //echo "\t val: $val, ran: $random_num</br>";
-      $val --;
-      $random_num --;
+      echo "\t val: $val, ran: $random_num</br>";
+      $val =$val-1;
+      $random_num=$random_num - 1;
     }
     if($random_num == 0){
       $user_role=$key;
@@ -104,6 +92,21 @@ else{
     }
   }
   $remaining_role_array[$user_role] --;
+
+  echo "<table>\n";
+  echo "\t<tr>\n";
+  echo "\n\n<td>Roles</td>\n";
+  echo "\n\n<td>Max Number</td>\n\n\n<td>Remaining Number</td>\n";
+  echo "\t<tr>\n";
+  foreach($total_role_array as $key => $val){
+    echo "\t<tr>\n";
+    echo "\n\n<td>$key</td>\n";
+    echo "\n\n<td>$val</td>\n";
+    echo "\n\n<td>" . $remaining_role_array[$key] . "</td>\n";
+    echo "\t</tr>\n";
+  }
+  echo "</table>\n";
+
   echo "Your role: $user_role</br>".
     "<form name='new_role action='./join_game.php' method='POST'>".
     "<input type='hidden' name='curr_role' value='$user_role'/>".
@@ -112,18 +115,18 @@ else{
     "<input type='submit' value='Get new role'/>".
     "</form>";
   if(isset($curr_role[$user_role])){
-    $curr_role[$user_role] ++;
+    $curr_role_array[$user_role] ++;
   }
   else{
-    $curr_role[$user_role] = 1;
+    $curr_role_array[$user_role] = 1;
   }
   $curr_role_raw="";
-  foreach($curr_role as $key => $val){
+  foreach($curr_role_array as $key => $val){
     $curr_role_raw = $curr_role_raw . "$key*$val,";
   }
   $curr_role_raw=substr($curr_role_raw, 0, strlen($curr_role_raw) - 1);
   $query="UPDATE werewolf_detail SET current_roles='$curr_role_raw' WHERE game_id=$game_id";
-  echo "query string: $curr_role_raw</br>";
+  //echo "query string: $query</br>";
   $mysqli->query($query);
 }
 ?>
