@@ -12,17 +12,20 @@ if($mysqli->connect_errno){
 }
 $result=$mysqli->query($query) or die ("Query failed.");
 
-//parse the all_role string
+//parse the all_role string. The final result stores in all_role_table. 
+//TODO: Refactor it after a better understanding of php.
 $temp_row=mysqli_fetch_array($result);
 $raw_role_string=$temp_row['all_roles'];
 $role_array=preg_split("/(\r\n|\n|\r)/", $raw_role_string);
 $role_num_array=array();
 $counter=0;
 $player_num=0;
+$all_role_table=array();
 foreach($role_array as &$role){
   $sub_role = explode("*", $role);
   if(isset($sub_role[1])){
     $role=$sub_role[0];
+    $all_role_table[$role]=(int)$sub_role[1];
     $role_num_array[$counter] = (int)$sub_role[1];
   }
   else{
@@ -32,18 +35,41 @@ foreach($role_array as &$role){
   $counter++;
 }
 
+//parse the current_roles string. result stores in curr_role_table.
+$curr_role_table=array();
+foreach($all_role_table as $key => $val){
+  $curr_role_table[$key] = 0;
+}
+$raw_curr_role_string=$temp_row['current_roles'];
+$role_array=preg_split("/(\r\n|\n|\r)/", $raw_curr_role_string);
+foreach($role_array as $role){
+  $sub_role=explode("*", $role);
+  if(isset($sub_role[1])){
+    $curr_role_table[$sub_role[0]]=$sub_role[1];
+  }
+  else{
+    $curr_role_table[$sub_role[0]]=1;
+  }
+}
+
+
 //print them out.
 echo "<table>\n";
 echo "\t<tr>\n";
     echo "\n\n<td>Roles</td>\n";
     echo "\n\n<td>Max Number</td>\n\n\n<td>Current Number</td>\n";
 echo "\t<tr>\n";
-for($i=0; $i < count($role_num_array); $i++) {
+foreach($all_role_table as $key => $val){
   echo "\t<tr>\n";
-    echo "\n\n<td>$role_array[$i]</td>\n";
-    echo "\n\n<td>$role_num_array[$i]</td>\n";
+    echo "\n\n<td>$key</td>\n";
+    echo "\n\n<td>$val</td>\n";
+    echo "\n\n<td>" . $curr_role_table[$key] . "</td>\n";
   echo "\t</tr>\n";
 }
 echo "</table>\n";
+echo "<form name='reset_form' action='./reset_game.php' method='POST'>".
+     "<input type='hidden' name='game_id' value='$game_id'/>".
+     "<input type='submit' value='Reset game'/>".
+     "</form>";
 $result->close();
 ?>
