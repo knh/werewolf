@@ -16,6 +16,7 @@ else{
   $temp_row=mysqli_fetch_array($result); 
   if(isset($_POST['last_update'])) {
     //echo "last update: ". $_POST['last_update'] . "last reset:" .$temp_row['last_reset'] . "</br>";
+    // if the user requested a new role before the host reset the game, maintain he's current role.
     if($_POST['last_update'] >= strtotime($temp_row['last_reset'])){
       echo "Please wait for the host to start the new game then request a new role.</br>".
         "Your current role is " . $_POST['curr_role'] ."</br>".
@@ -28,6 +29,7 @@ else{
       return;
     }
   }
+  //again, parseing the all role string.
   $raw_role_string=$temp_row['all_roles'];
   $role_array=preg_split("/(\r\n|\n|\r)/", $raw_role_string);
   $total_role_array=array();
@@ -44,6 +46,7 @@ else{
     }
   }
   $curr_player=0;
+  // parsing the current role string from db.
   $raw_role_string=$temp_row['current_roles'];
   //echo "DEBUG: raw_role_string: $raw_role_string</br>";
   //echo "DEGUG: is empty: ". ($raw_role_string == '') . "</br>";
@@ -67,7 +70,7 @@ else{
     echo "Too many players. Please attend the next round.";
     return;
   }
-  $remaining_role_array=array();
+  $remaining_role_array=array();// create the remaining role array and use that to assign a random role to a user.
   foreach($total_role_array as $key => $val){
     if(isset($curr_role_array[$key])){
       $remaining_role_array[$key] = $val - $curr_role_array[$key];
@@ -76,7 +79,7 @@ else{
     }
   }
 
-
+  //create something like a linked list so that a random number can fall on one available role.
   $user_role;
   $temp_array=array();
   foreach($remaining_role_array as $key => $val){
@@ -89,23 +92,9 @@ else{
   //  echo "$var ";
   //}
   //echo "</br>";
-  $random_num=rand(0, count($temp_array) - 1);
+  $random_num=rand(0, count($temp_array) - 1);//note in php, the range is inclusive.
   //echo "DEBUG: random: $random_num<br>";
   $user_role=$temp_array[$random_num];
-  /*
-  foreach($remaining_role_array as $key =>$val){
-    echo "foreach: $key => $val </br>";
-    while($random_num != 0 && $val != 0){
-      echo "\t val: $val, ran: $random_num</br>";
-      $val =$val-1;
-      $random_num=$random_num - 1;
-    }
-    if($random_num == 0 && $val > 0){
-      $user_role=$key;
-      break;
-    }
-  }
-  */
   $remaining_role_array[$user_role] --;
   /*
   echo "<table>\n";
@@ -129,6 +118,7 @@ else{
     "<input type='hidden' name='last_update' value='" . strtotime("now") ."'/>".
     "<input type='submit' value='Get new role'/>".
     "</form>";
+    //construct the new current role array, then parse it to a string
   if(isset($curr_role[$user_role])){
     $curr_role_array[$user_role] ++;
   }
@@ -140,7 +130,7 @@ else{
     $curr_role_raw = $curr_role_raw . "$key*$val,";
   }
   $curr_role_raw=substr($curr_role_raw, 0, strlen($curr_role_raw) - 1);
-  $query="UPDATE werewolf_detail SET current_roles='$curr_role_raw' WHERE game_id=$game_id";
+  $query="UPDATE werewolf_detail SET current_roles='$curr_role_raw' WHERE game_id=$game_id";//write back the new current role string after this user takes a role.
   //echo "query string: $query</br>";
   $mysqli->query($query);
 }
