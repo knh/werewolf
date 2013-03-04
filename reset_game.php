@@ -3,6 +3,7 @@ header('Content-type: text/html; charset=utf-8');
 ini_set('display_errors', 'on');
 error_reporting(E_ALL);
 $game_id=$_POST['game_id'];
+//wipe out the current role field and update last reset timestamp so that user can refresh and get a new role.
 $query="UPDATE werewolf_detail SET last_reset=now(), current_roles=NULL  WHERE game_id='$game_id'";
 $mysqli=new mysqli("mydb.ics.purdue.edu",
               "gao118", "polaris", "gao118", "3306");
