@@ -70,13 +70,14 @@ foreach($all_role_table as $key => $val){
   echo "\t</tr>\n";
 }
 echo "</table>\n";
-echo "<form name='reset_form' action='./reset_game.php' method='POST'>".
-     "<input type='hidden' name='game_id' value='$game_id'/>".
-     "<input type='submit' value='Reset game'/>".
-     "</form>".
-     "<form name='refresh_form' action='./control_game.php' method='GET'>".
+echo "<form name='refresh_form' action='./control_game.php' method='GET'>".
      "<input type='hidden' name='game_id' value='$game_id'/>".
      "<input type='submit' value='Refresh'>".
+     "</form>".
+     "<form name='reset_form' action='./reset_game.php' method='POST'>".
+     "<input type='hidden' name='game_id' value='$game_id'/>".
+     "<input type='submit' value='Reset game'/>".
      "</form>";
+echo "<a href='./index.html'>Abandon game and return to index</a>";
 $result->close();
 ?>

@@ -6,7 +6,7 @@ $query="SELECT * FROM werewolf_detail WHERE game_id=$game_id";
 $mysqli=new mysqli("mydb.ics.purdue.edu",
     "gao118", "polaris", "gao118", "3306");
 $result=$mysqli->query($query) or die("Query failed. ");
-
+echo "Your game ID: $game_id</br>";
 if(mysqli_num_rows($result) == 0){
   echo "Game ID $game_id doesn't exist. <script>window.setInterval(function(){document.location='./index.html'}, 2000)</script>";
   return;
@@ -44,14 +44,14 @@ else{
   }
   $curr_player=0;
   $raw_role_string=$temp_row['current_roles'];
-  echo "DEBUG: raw_role_string: $raw_role_string</br>";
+  //echo "DEBUG: raw_role_string: $raw_role_string</br>";
   //echo "DEGUG: is empty: ". ($raw_role_string == '') . "</br>";
   $role_array=explode(",", $raw_role_string);
   $curr_role_array=array();
   if($role_array[0] != ''){
     foreach($role_array as $role){
       $sub_role=explode("*", $role);
-      echo "Debug: curr_role: " . $sub_role[0] . "</br>";
+      //echo "Debug: curr_role: " . $sub_role[0] . "</br>";
       if(isset($sub_role[1])){
         $curr_role_array[$sub_role[0]]=(int) $sub_role[1];
         $curr_player+=$sub_role[1];
@@ -76,9 +76,22 @@ else{
   }
 
 
-  $random_num=rand(0, $total_player-$curr_player);
-  //echo "ran: $random_num, total: $total_player, curr: $curr_player </br>";
   $user_role;
+  $temp_array=array();
+  foreach($remaining_role_array as $key => $val){
+    for($i = 0; $i < $val; $i ++){
+      array_push($temp_array, $key);
+    }
+  }
+  //echo "DEBUG temp_array: ";
+  //foreach($temp_array as $var){
+  //  echo "$var ";
+  //}
+  //echo "</br>";
+  $random_num=rand(0, count($temp_array) - 1);
+  //echo "DEBUG: random: $random_num<br>";
+  $user_role=$temp_array[$random_num];
+  /*
   foreach($remaining_role_array as $key =>$val){
     echo "foreach: $key => $val </br>";
     while($random_num != 0 && $val != 0){
@@ -86,13 +99,14 @@ else{
       $val =$val-1;
       $random_num=$random_num - 1;
     }
-    if($random_num == 0){
+    if($random_num == 0 && $val > 0){
       $user_role=$key;
       break;
     }
   }
+  */
   $remaining_role_array[$user_role] --;
-
+  /*
   echo "<table>\n";
   echo "\t<tr>\n";
   echo "\n\n<td>Roles</td>\n";
@@ -106,7 +120,7 @@ else{
     echo "\t</tr>\n";
   }
   echo "</table>\n";
-
+  */
   echo "Your role: $user_role</br>".
     "<form name='new_role action='./join_game.php' method='POST'>".
     "<input type='hidden' name='curr_role' value='$user_role'/>".
