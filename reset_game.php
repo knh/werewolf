@@ -1,16 +1,15 @@
 <?php
-header('Content-type: text/html; charset=utf-8'); 
-ini_set('display_errors', 'on');
-error_reporting(E_ALL);
-$game_id=$_POST['game_id'];
+require_once('init.php');
+
+$game_id=(int) $_POST['game_id']; //prevent SQL injection attacks
+
 //wipe out the current role field and update last reset timestamp so that user can refresh and get a new role.
 $query="UPDATE werewolf_detail SET last_reset=now(), current_roles=NULL  WHERE game_id='$game_id'";
-$mysqli=new mysqli("mydb.ics.purdue.edu",
-              "gao118", "polaris", "gao118", "3306");
-if($mysqli->connect_errno){
-  echo "connect failed." . $mysqli_connect_error;
-}
+
 $result=$mysqli->query($query) or die ("query failed.");
-echo "Update successuful. Redirecting to original page.".
-      "<script>window.setInterval(function(){document.location='./control_game.php?game_id=" .$game_id . "'}, 2000)</script>";
+
+@header("Location: control_game.php?game_id=" . $game_id); //Use header redirection first!
+
+echo "Update successuful. Redirecting to original page.
+<script>window.setInterval(function(){document.location='./control_game.php?game_id=" .$game_id . "'}, 2000)</script>";
 ?>

@@ -1,49 +1,48 @@
 <?php
-header('Content-type: text/html; charset=utf-8'); 
-ini_set('display_errors', 'On');
-error_reporting(E_ALL);
-$game_id=$_POST['game_id'];
-$query="SELECT * FROM werewolf_detail WHERE game_id=$game_id";
-$mysqli=new mysqli("mydb.ics.purdue.edu",
-    "gao118", "polaris", "gao118", "3306");
+require_once('init.php');
+
+$game_id =  (int) $_POST['game_id']; // prevent SQL injections
+$query="SELECT * FROM werewolf_detail WHERE game_id = $game_id";
 $result=$mysqli->query($query) or die("Query failed. ");
 echo "Your game ID: $game_id</br>";
+
 if(mysqli_num_rows($result) == 0){
-  echo "Game ID $game_id doesn't exist. <script>window.setInterval(function(){document.location='./index.html'}, 2000)</script>";
-  return;
+	echo "Game ID $game_id doesn't exist. <script>window.setInterval(function(){document.location='./index.html'}, 2000)</script>";
+	return;
 }
 else{
   $temp_row=mysqli_fetch_array($result); 
   if(isset($_POST['last_update'])) {
-    //echo "last update: ". $_POST['last_update'] . "last reset:" .$temp_row['last_reset'] . "</br>";
-    // if the user requested a new role before the host reset the game, maintain he's current role.
-    if($_POST['last_update'] >= strtotime($temp_row['last_reset'])){
-      echo "Please wait for the host to start the new game then request a new role.</br>".
-        "Your current role is " . $_POST['curr_role'] ."</br>".
-        "<form name='new_role action='./join_game.php' method='POST'>".
-        "<input type='hidden' name='curr_role' value='".$_POST['curr_role'] ."'/>".
-        "<input type='hidden' name='game_id' value='$game_id' />".
-        "<input type='hidden' name='last_update' value='" . $_POST['last_update'] ."'/>".
-        "<input type='submit' value='Get new role'/>".
-        "</form>";
-      return;
-    }
+	// TODO: fix potential unchecked input XSS hole
+	//echo "last update: ". $_POST['last_update'] . "last reset:" .$temp_row['last_reset'] . "</br>";
+	// if the user requested a new role before the host reset the game, maintain he's current role.
+	if($_POST['last_update'] >= strtotime($temp_row['last_reset'])){
+		echo "Please wait for the host to start the new game then request a new role.</br>".
+			"Your current role is " . $_POST['curr_role'] ."</br>".
+			"<form name='new_role action='./join_game.php' method='POST'>".
+			"<input type='hidden' name='curr_role' value='" . $_POST['curr_role'] . "'/>".
+			"<input type='hidden' name='game_id' value='$game_id' />".
+			"<input type='hidden' name='last_update' value='" . $_POST['last_update'] ."'/>".
+			"<input type='submit' value='Get new role'/>".
+			"</form>";
+		return;
+	}
   }
-  //again, parseing the all role string.
-  $raw_role_string=$temp_row['all_roles'];
-  $role_array=preg_split("/(\r\n|\n|\r)/", $raw_role_string);
-  $total_role_array=array();
-  $total_player=0;
-  foreach($role_array as $role){
-    $sub_role=explode("*", $role);
-    if(isset($sub_role[1])){
-      $total_role_array[$sub_role[0]]=(int) $sub_role[1];
-      $total_player+=$sub_role[1];
-    }
-    else{
-      $total_role_array[$sub_role[0]]=(int) 1;
-      $total_player+=1;
-    }
+	//again, parseing the all role string.
+	$raw_role_string=$temp_row['all_roles'];
+	$role_array=preg_split("/(\r\n|\n|\r)/", $raw_role_string);
+	$total_role_array=array();
+	$total_player=0;
+	foreach($role_array as $role){
+		$sub_role=explode("*", $role);
+	if(isset($sub_role[1])){
+		$total_role_array[$sub_role[0]]=(int) $sub_role[1];
+		$total_player+=$sub_role[1];
+	}
+	else{
+		$total_role_array[$sub_role[0]]=(int) 1;
+		$total_player+=1;
+	}
   }
   $curr_player=0;
   // parsing the current role string from db.
